@@ -1,1 +1,276 @@
+bmscecse@bmscecse-HP-Elite-Tower-800-G9-Desktop-PC:~$ cqlsh
+\Connected to Test Cluster at 127.0.0.1:9042
+[cqlsh 6.1.0 | Cassandra 4.1.8 | CQL spec 3.4.6 | Native protocol v5]
+Use HELP for help.
+cqlsh> CREATE KEYSPACE library WITH replication = {&#39;class&#39;:
+Invalid syntax at char 45
+  CREATE KEYSPACE library WITH replication = {&#39;class&#39;:
+                                              ^
+cqlsh> create keyspace library with replication={'class':'SimpleStrategy','replication_factor':1};
+AlreadyExists: Keyspace 'library' already exists
+cqlsh> drop keyspace library
+   ... ;
+OperationTimedOut: errors={'127.0.0.1:9042': 'Client request timeout. See Session.execute[_async](timeout)'}, last_host=127.0.0.1:9042
+cqlsh> drop keyspace library;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Keyspace 'library' doesn't exist"
+cqlsh> describe keyspaces;
+
+commerce    my_keyspace   system_auth         system_virtual_schema
+emp         my_keyspace1  system_distributed  test_keyspace        
+"EMPLOYEE"  my_keyspace2  system_schema     
+employee    students      system_traces     
+employee2   system        system_views      
+
+cqlsh> create keyspace library with replication={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> use library;
+cqlsh:library> CREATE TABLE Library_info(stud_id int, stud_name text, book_name text,book_id text,date_of_issue timestamp, counter_value counter, PRIMARY KEY(stud_id,stud_name,book_name, book_id,date_of_issue));
+cqlsh:library> BEGIN COUNTER BATCH
+           ... UPDATE library_info set counter_value +=1 where stud_id = 111 and stud_name='Manoj' and book_name='Operations Research' and book_id='56TXT' and date_of_issue='2021-09-12';
+           ... UPDATE library_info set counter_value +=1 where stud_id = 112 and stud_name='Kamal' and book_name='Engineering Mathematics-3' and book_id='5ERw4' and date_of_issue='2021-04-10';
+           ... UPDATE library_info set counter_value +=1 where stud_id = 113 and stud_name ='Mahesh' and book_name='Robinson Crusoe' and bppk_id='34EDC' and date_of_issue='2021-02-01';
+           ... UPDATE library_info set counter_value +=1 where stud_id = 114 and stud_name='Raj' and book_name='Engineering Drawing' and book_id='123ER' and date_of_issue='2021-04-03';
+           ... apply batch;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Undefined column name bppk_id in table library.library_info"
+cqlsh:library> BEGIN COUNTER BATCH UPDATE library_info set counter_value +=1 where stud_id = 111 and stud_name='Manoj' and book_name='Operations Research' and book_id='56TXT' and date_of_issue='2021-09-12'; UPDATE library_info set counter_value +=1 where stud_id = 112 and stud_name='Kamal' and book_name='Engineering Mathematics-3' and book_id='5ERw4' and date_of_issue='2021-04-10'; UPDATE library_info set counter_value +=1 where stud_id = 113 and stud_name ='Mahesh' and book_name='Robinson Crusoe' and book_id='34EDC' and date_of_issue='2021-02-01'; UPDATE library_info set counter_value +=1 where stud_id = 114 and stud_name='Raj' and book_name='Engineering Drawing' and book_id='123ER' and date_of_issue='2021-04-03'; apply batch;
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(4 rows)
+cqlsh:library> 
+cqlsh:library> UPDATE library_info set counter_value += 1 where stud_id = 112 and stud_name='Kamal' and book_name='Engineering Mathametics-3' and book_id='5ERW4' and date_of_issue='2021-04-09';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(5 rows)
+cqlsh:library> UPDATE library_info set counter_value += 1 where stud_id = 112 and stud_name='Kamal' and book_name='Engineering Mathametics-3' and book_id='5ERW4' and date_of_issue='2021-04-10';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(6 rows)
+cqlsh:library> delete from library_info where book_id='5ERW4' and date_of_issue='2021-04-09';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: stud_id"
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-09';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="PRIMARY KEY column "book_id" cannot be restricted as preceding column "stud_name" is not restricted"
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(6 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-09' and book_name='Engineering-Mathematics-3';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="PRIMARY KEY column "book_name" cannot be restricted as preceding column "stud_name" is not restricted"
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-10' and book_name='Engineering-Mathematics-3';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="PRIMARY KEY column "book_name" cannot be restricted as preceding column "stud_name" is not restricted"
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-10' and book_name='Engineering-Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;\
+Invalid syntax at char 28
+  select * from library_info;\
+                             ^
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(6 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-10' and book_name='Engineering-Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(6 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-10' and book_name='Engineering Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(6 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-09' and book_name='Engineering Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(6 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-09' and book_name='Engineering Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(6 rows)
+cqlsh:library> 
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERw4' and date_of_issue='2021-04-09' and book_name='Engineering Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathematics-3 |   5ERw4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(6 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERw4' and date_of_issue='2021-04-10' and book_name='Engineering Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(5 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-10' and book_name='Engineering Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(5 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-09' and book_name='Engineering Mathematics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(5 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-09' and book_name='Engineering Mathamatics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(5 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-09' and book_name='Engineering Mathametics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(4 rows)
+cqlsh:library> UPDATE library_info set counter_value += 1 where stud_id = 112 and stud_name='Kamal' and book_name='Engineering Mathametics-3' and book_id='5ERW4' and date_of_issue='2021-04-09';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             2
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             1
+
+(5 rows)
+cqlsh:library> UPDATE library_info set counter_value += 1 where stud_id = 112 and stud_name='Kamal' and book_name='Engineering Mathametics-3' and book_id='5ERW4' and date_of_issue='2021-04-10';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             2
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-09 18:30:00.000000+0000 |             2
+
+(5 rows)
+cqlsh:library> delete from library_info where stud_id=112 and  book_id='5ERW4' and date_of_issue='2021-04-10' and book_name='Engineering Mathametics-3' and stud_name='Kamal';
+cqlsh:library> select * from library_info;
+
+ stud_id | stud_name | book_name                 | book_id | date_of_issue                   | counter_value
+---------+-----------+---------------------------+---------+---------------------------------+---------------
+     114 |       Raj |       Engineering Drawing |   123ER | 2021-04-02 18:30:00.000000+0000 |             1
+     111 |     Manoj |       Operations Research |   56TXT | 2021-09-11 18:30:00.000000+0000 |             1
+     113 |    Mahesh |           Robinson Crusoe |   34EDC | 2021-01-31 18:30:00.000000+0000 |             1
+     112 |     Kamal | Engineering Mathametics-3 |   5ERW4 | 2021-04-08 18:30:00.000000+0000 |             2
+
+(4 rows)
+cqlsh:library> copy library_info(stud_id,stud_name, book_name, book_id,date_of_issue,counter_value) to 'library_info.csv';
+Using 16 child processes
+
+Starting copy of library.library_info with columns [stud_id, stud_name, book_name, book_id, date_of_issue, counter_value].
+Processed: 4 rows; Rate:      31 rows/s; Avg. rate:      31 rows/s
+4 rows exported to 1 files in 0.153 seconds.
+cqlsh:library> copy library_info(stud_id,stud_name, book_name, book_id,date_of_issue,counter_value) to 'library_info.csv';
+
 
