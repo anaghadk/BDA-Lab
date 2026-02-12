@@ -1,0 +1,202 @@
+bmscecse@bmscecse-HP-Elite-Tower-800-G9-Desktop-PC:~$ cqlsh
+Connected to Test Cluster at 127.0.0.1:9042
+[cqlsh 6.1.0 | Cassandra 4.1.8 | CQL spec 3.4.6 | Native protocol v5]
+Use HELP for help.
+cqlsh> describe keyspaces;
+
+commerce    library       system              system_views         
+emp         my_keyspace   system_auth         system_virtual_schema
+"EMPLOYEE"  my_keyspace1  system_distributed  test_keyspace        
+employee    my_keyspace2  system_schema     
+employee2   students      system_traces     
+
+cqlsh> use students;
+cqlsh:students> CREATE TABLE Students_Info (Roll_No int PRIMARY KEY, StudName text,DateOfJoining timestamp, last_exam_Percent double);
+AlreadyExists: Table 'students.students_info' already exists
+cqlsh:students> drop keyspace students;
+cqlsh:students> create keyspace students;
+SyntaxException: line 1:24 mismatched input ';' expecting K_WITH (create keyspace students[;])
+cqlsh:students> CREATE KEYSPACE Students WITH REPLICATION ={'class':'SimpleStrategy','replication_factor':1};
+cqlsh:students> use students;
+cqlsh:students> CREATE TABLE Students_Info (Roll_No int PRIMARY KEY, StudName text,DateOfJoining timestamp, last_exam_Percent double);
+cqlsh:students> describe tables;
+
+students_info
+
+cqlsh:students> describe table Students_info;
+
+CREATE TABLE students.students_info (
+    roll_no int PRIMARY KEY,
+    dateofjoining timestamp,
+    last_exam_percent double,
+    studname text
+) WITH additional_write_policy = '99p'
+    AND bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND cdc = false
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '16', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND memtable = 'default'
+    AND crc_check_chance = 1.0
+    AND default_time_to_live = 0
+    AND extensions = {}
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair = 'BLOCKING'
+    AND speculative_retry = '99p';
+cqlsh:students> BEGIN BATCH
+            ... INSERT INTO Students_Info (Roll_No, StudName, DateOfJoining, last_exam_Percent)
+            ... VALUES (1, 'Asha', '2012-03-12', 79.9);
+            ... 
+            ... INSERT INTO Students_Info (Roll_No, StudName, DateOfJoining, last_exam_Percent)
+            ... VALUES (2, 'Kiran', '2012-03-12', 89.9);
+            ... 
+            ... INSERT INTO Students_Info (Roll_No, StudName, DateOfJoining, last_exam_Percent)
+            ... VALUES (3, 'Tarun', '2012-03-12', 78.9);
+            ... 
+            ... INSERT INTO Students_Info (Roll_No, StudName, DateOfJoining, last_exam_Percent)
+            ... VALUES (4, 'Samrth', '2012-03-12', 90.9);
+            ... 
+            ... INSERT INTO Students_Info (Roll_No, StudName, DateOfJoining, last_exam_Percent)
+            ... VALUES (5, 'Smitha', '2012-03-12', 67.9);
+            ... 
+            ... INSERT INTO Students_Info (Roll_No, StudName, DateOfJoining, last_exam_Percent)
+            ... VALUES (6, 'Rohan', '2012-03-12', 56.9);
+            ... APPLY BATCH;
+cqlsh:students> 
+cqlsh:students> SELECT * FROM Students_Info;
+
+ roll_no | dateofjoining                   | last_exam_percent | studname
+---------+---------------------------------+-------------------+----------
+       5 | 2012-03-11 18:30:00.000000+0000 |              67.9 |   Smitha
+       1 | 2012-03-11 18:30:00.000000+0000 |              79.9 |     Asha
+       2 | 2012-03-11 18:30:00.000000+0000 |              89.9 |    Kiran
+       4 | 2012-03-11 18:30:00.000000+0000 |              90.9 |   Samrth
+       6 | 2012-03-11 18:30:00.000000+0000 |              56.9 |    Rohan
+       3 | 2012-03-11 18:30:00.000000+0000 |              78.9 |    Tarun
+
+(6 rows)
+cqlsh:students> SELECT * FROM Students_Info WHERE Roll_No IN (1,2,3);
+
+ roll_no | dateofjoining                   | last_exam_percent | studname
+---------+---------------------------------+-------------------+----------
+       1 | 2012-03-11 18:30:00.000000+0000 |              79.9 |     Asha
+       2 | 2012-03-11 18:30:00.000000+0000 |              89.9 |    Kiran
+       3 | 2012-03-11 18:30:00.000000+0000 |              78.9 |    Tarun
+
+(3 rows)
+cqlsh:students> SELECT * FROM Students_Info WHERE StudName = 'Asha';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:students> CREATE INDEX ON Students_Info (StudName);
+cqlsh:students> 
+cqlsh:students> SELECT * FROM Students_Info WHERE Roll_No IN (1,2,3);
+
+ roll_no | dateofjoining                   | last_exam_percent | studname
+---------+---------------------------------+-------------------+----------
+       1 | 2012-03-11 18:30:00.000000+0000 |              79.9 |     Asha
+       2 | 2012-03-11 18:30:00.000000+0000 |              89.9 |    Kiran
+       3 | 2012-03-11 18:30:00.000000+0000 |              78.9 |    Tarun
+
+(3 rows)
+cqlsh:students> SELECT * FROM Students_Info WHERE StudName = 'Asha';
+
+ roll_no | dateofjoining                   | last_exam_percent | studname
+---------+---------------------------------+-------------------+----------
+       1 | 2012-03-11 18:30:00.000000+0000 |              79.9 |     Asha
+
+(1 rows)
+cqlsh:students> SELECT * FROM Students_Info WHERE StudName = 'Asha';
+
+ roll_no | dateofjoining                   | last_exam_percent | studname
+---------+---------------------------------+-------------------+----------
+       1 | 2012-03-11 18:30:00.000000+0000 |              79.9 |     Asha
+
+(1 rows)
+cqlsh:students> SELECT Roll_No, StudName FROM Students_Info LIMIT 2;
+
+ roll_no | studname
+---------+----------
+       5 |   Smitha
+       1 |     Asha
+
+(2 rows)
+cqlsh:students> SELECT Roll_No AS USN FROM Students_Info;
+
+ usn
+-----
+   5
+   1
+   2
+   4
+   6
+   3
+
+(6 rows)
+cqlsh:students> UPDATE Students_Info 
+            ... SET StudName = 'David Sheen' 
+            ... WHERE Roll_No = 2;
+cqlsh:students> UPDATE Students_Info 
+            ... SET Roll_No = 6 
+            ... WHERE Roll_No = 3;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="PRIMARY KEY part roll_no found in SET part"
+cqlsh:students> DELETE last_exam_Percent 
+            ... FROM Students_Info 
+            ... WHERE Roll_No = 2;
+cqlsh:students> DELETE FROM Students_Info 
+            ... WHERE Roll_No = 2;
+cqlsh:students> ALTER TABLE Students_Info 
+            ... ADD hobbies SET<text>;
+cqlsh:students> ALTER TABLE Students_Info 
+            ... ADD language LIST<text>;
+cqlsh:students> UPDATE Students_Info
+            ... SET hobbies = hobbies + {'Chess', 'Table Tennis'}
+            ... WHERE Roll_No = 1;
+cqlsh:students> SELECT * FROM Students_Info WHERE Roll_No = 1;
+
+ roll_no | dateofjoining                   | hobbies                   | language | last_exam_percent | studname
+---------+---------------------------------+---------------------------+----------+-------------------+----------
+       1 | 2012-03-11 18:30:00.000000+0000 | {'Chess', 'Table Tennis'} |     null |              79.9 |     Asha
+
+(1 rows)
+cqlsh:students> UPDATE Students_Info
+            ... SET language = language + ['Hindi', 'English']
+            ... WHERE Roll_No = 1;
+cqlsh:students> CREATE TABLE library_book (
+            ...     book_name text,
+            ...     stud_name text,
+            ...     counter_value counter,
+            ...     PRIMARY KEY (book_name, stud_name)
+            ... );
+cqlsh:students> UPDATE library_book 
+            ... SET counter_value = counter_value + 1
+            ... WHERE book_name = 'Big data Analytics'
+            ... AND stud_name = 'jeet';
+cqlsh:students> CREATE TABLE userlogin (
+            ...     userid int PRIMARY KEY,
+            ...     password text
+            ... );
+cqlsh:students> INSERT INTO userlogin (userid, password) 
+            ... VALUES (1, 'infy') USING TTL 30;
+cqlsh:students> SELECT TTL(password) FROM userlogin WHERE userid = 1;
+
+ ttl(password)
+---------------
+            28
+
+(1 rows)
+cqlsh:students> COPY elearninglists (id, course_order, course_id, courseowner, title)
+            ... TO 'd:/elearninglists.csv';
+Column family elearninglists not found
+cqlsh:students> COPY elearninglists (id, course_order, course_id, courseowner, title)
+            ... FROM 'd:/elearninglists.csv';
+Column family elearninglists not found
+cqlsh:students> COPY persons (id, fname, lname) FROM STDIN;
+Column family persons not found
+cqlsh:students> COPY elearninglists (id, course_order, course_id, courseowner, title)
+            ... TO STDOUT;
+Column family elearninglists not found
+cqlsh:students> 
+
